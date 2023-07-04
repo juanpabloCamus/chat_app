@@ -5,8 +5,13 @@ final _firebase = FirebaseAuth.instance;
 
 class AuthRepository {
   Future<dynamic> registerUser(String email, String password) async {
-    final user = await _firebase.createUserWithEmailAndPassword(
-        email: email, password: password);
-    return user;
+    try {
+      final userCredentials = await _firebase.createUserWithEmailAndPassword(
+          email: email, password: password);
+
+      return userCredentials;
+    } catch (error) {
+      return 'ERROR: $error';
+    }
   }
 }

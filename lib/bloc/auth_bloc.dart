@@ -10,9 +10,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final AuthRepository authRepository;
 
   AuthBloc(this.authRepository) : super(AuthInitial()) {
-    on<AuthSignInEvent>((event, emit) async {
-      final user =
-          await authRepository.registerUser(event.email, event.password);
-    });
+    on<AuthSignInEvent>(
+      (event, emit) async {
+        final userCredentials =
+            await authRepository.registerUser(event.email, event.password);
+
+        if (userCredentials.toString().contains('ERROR')) {
+          return emit(AuthErrorState(message: userCredentials));
+        }
+
+        return emit(AuthSignUpState(message: 'User created succesfully'));
+      },
+    );
   }
 }

@@ -1,4 +1,6 @@
 import 'package:chat_app/bloc/auth_bloc.dart';
+import 'package:chat_app/utils/show_snackbar.dart';
+import 'package:chat_app/validators/auth_validators.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -23,20 +25,6 @@ class _AuthScreenState extends State<AuthScreen> {
     });
   }
 
-  String? _emailValidator(String? value) {
-    if (value == null || value.trim().isEmpty || !value.contains('@')) {
-      return 'Invalid email address.';
-    }
-    return null;
-  }
-
-  String? _passwordValidator(String? value) {
-    if (value == null || value.length < 6) {
-      return 'Password must have 6 or more characters.';
-    }
-    return null;
-  }
-
   void _onSubmit(BuildContext context) {
     final isValid = _form.currentState!.validate();
 
@@ -56,11 +44,20 @@ class _AuthScreenState extends State<AuthScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<AuthBloc, AuthState>(
-      builder: (context, state) {
+  Widget build(BuildContext widgetContext) {
+    return BlocConsumer<AuthBloc, AuthState>(
+      listener: (listenerContext, state) {
+        if (state is AuthErrorState) {
+          showSnackBar(
+              listenerContext, state.message.split('] ')[1], Colors.red);
+        }
+        if (state is AuthSignUpState) {
+          showSnackBar(listenerContext, state.message, Colors.green);
+        }
+      },
+      builder: (builderContext, state) {
         return Scaffold(
-          backgroundColor: Theme.of(context).colorScheme.primary,
+          backgroundColor: Theme.of(builderContext).colorScheme.primary,
           body: Center(
               child: SingleChildScrollView(
             child: Column(
@@ -94,7 +91,7 @@ class _AuthScreenState extends State<AuthScreen> {
                               keyboardType: TextInputType.emailAddress,
                               autocorrect: false,
                               textCapitalization: TextCapitalization.none,
-                              validator: (value) => _emailValidator(value),
+                              validator: (value) => emailValidator(value),
                               onSaved: (newValue) {
                                 enteredEmail = newValue!;
                               },
@@ -104,7 +101,7 @@ class _AuthScreenState extends State<AuthScreen> {
                                 label: Text('Password'),
                               ),
                               obscureText: true,
-                              validator: (value) => _passwordValidator(value),
+                              validator: (value) => passwordValidator(value),
                               onSaved: (newValue) {
                                 enteredPassword = newValue!;
                               },
@@ -114,13 +111,12 @@ class _AuthScreenState extends State<AuthScreen> {
                             ),
                             ElevatedButton(
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Theme.of(context)
+                                backgroundColor: Theme.of(builderContext)
                                     .colorScheme
                                     .primaryContainer,
                               ),
                               onPressed: () {
-                                //context.read<AuthBloc>().add(AuthSignInEvent());
-                                _onSubmit(context);
+                                _onSubmit(builderContext);
                               },
                               child: Text(
                                 _isLogin ? 'Login' : 'Sign up',
