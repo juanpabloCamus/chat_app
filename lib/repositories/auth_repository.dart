@@ -1,5 +1,6 @@
+// ignore_for_file: avoid_print
+
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
 
 final _firebase = FirebaseAuth.instance;
 
@@ -10,8 +11,22 @@ class AuthRepository {
           email: email, password: password);
 
       return userCredentials;
-    } catch (error) {
-      return 'ERROR: $error';
+    } on FirebaseAuthException catch (error) {
+      return 'ERROR: ${error.message}';
     }
+  }
+
+  Future<User?> logInUser(String email, String password) async {
+    try {
+      final UserCredential userCredentials = await _firebase
+          .signInWithEmailAndPassword(email: email, password: password);
+
+      return userCredentials.user;
+    } on FirebaseAuthException catch (error) {
+      throw FirebaseAuthException(code: error.code, message: error.message);
+    } catch (error) {
+      print(error);
+    }
+    return null;
   }
 }

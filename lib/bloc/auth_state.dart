@@ -23,3 +23,10 @@ class AuthSignUpState extends AuthState {
     required this.message,
   });
 }
+
+class AuthenticatedState extends AuthState {
+  final User user;
+  final AuthenticationState state;
+  AuthenticatedState(
+      {required this.user, this.state = AuthenticationState.authenticated});
+}

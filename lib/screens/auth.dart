@@ -25,7 +25,7 @@ class _AuthScreenState extends State<AuthScreen> {
     });
   }
 
-  void _onSubmit(BuildContext context) {
+  void _onSubmit() {
     final isValid = _form.currentState!.validate();
 
     if (!isValid) return;
@@ -33,6 +33,12 @@ class _AuthScreenState extends State<AuthScreen> {
     _form.currentState!.save();
 
     if (_isLogin) {
+      context.read<AuthBloc>().add(
+            AuthSignUpEvent(
+              email: enteredEmail,
+              password: enteredPassword,
+            ),
+          );
     } else {
       context.read<AuthBloc>().add(
             AuthSignInEvent(
@@ -48,11 +54,13 @@ class _AuthScreenState extends State<AuthScreen> {
     return BlocConsumer<AuthBloc, AuthState>(
       listener: (listenerContext, state) {
         if (state is AuthErrorState) {
-          showSnackBar(
-              listenerContext, state.message.split('] ')[1], Colors.red);
+          showSnackBar(listenerContext, state.message, Colors.red);
         }
         if (state is AuthSignUpState) {
           showSnackBar(listenerContext, state.message, Colors.green);
+        }
+        if (state is AuthenticatedState) {
+          print(state.user);
         }
       },
       builder: (builderContext, state) {
@@ -116,7 +124,7 @@ class _AuthScreenState extends State<AuthScreen> {
                                     .primaryContainer,
                               ),
                               onPressed: () {
-                                _onSubmit(builderContext);
+                                _onSubmit();
                               },
                               child: Text(
                                 _isLogin ? 'Login' : 'Sign up',
