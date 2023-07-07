@@ -12,8 +12,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   AuthBloc(this.authRepository) : super(AuthInitial()) {
     on<AuthSignInEvent>(
-      (event, emit) async {
-        final userCredentials =
+      (AuthSignInEvent event, Emitter<AuthState> emit) async {
+        final User userCredentials =
             await authRepository.registerUser(event.email, event.password);
 
         if (userCredentials.toString().contains('ERROR')) {
@@ -31,21 +31,29 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         );
       },
     );
-    on<AuthSignUpEvent>((event, emit) async {
-      try {
-        final User? user =
-            await authRepository.logInUser(event.email, event.password);
+    on<AuthSignUpEvent>(
+      (AuthSignUpEvent event, Emitter<AuthState> emit) async {
+        try {
+          final User? user =
+              await authRepository.logInUser(event.email, event.password);
 
-        if (user != null) {
-          emit(AuthenticatedState(user: user));
+          if (user != null) {
+            emit(AuthenticatedState(user: user));
+          }
+        } on FirebaseAuthException catch (error) {
+          emit(
+            AuthErrorState(
+              message: error.message!,
+            ),
+          );
         }
-      } on FirebaseAuthException catch (error) {
-        emit(
-          AuthErrorState(
-            message: error.message!,
-          ),
-        );
-      }
-    });
+      },
+    );
+    on<AuthLogoutEvent>(
+      (AuthLogoutEvent event, Emitter<AuthState> emit) {
+        authRepository.logoutUser();
+        emit(AuthUnathenticatedState());
+      },
+    );
   }
 }

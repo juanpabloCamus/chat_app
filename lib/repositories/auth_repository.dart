@@ -2,13 +2,16 @@
 
 import 'package:firebase_auth/firebase_auth.dart';
 
-final _firebase = FirebaseAuth.instance;
+final FirebaseAuth _firebase = FirebaseAuth.instance;
 
 class AuthRepository {
   Future<dynamic> registerUser(String email, String password) async {
     try {
-      final userCredentials = await _firebase.createUserWithEmailAndPassword(
-          email: email, password: password);
+      final UserCredential userCredentials =
+          await _firebase.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
 
       return userCredentials;
     } on FirebaseAuthException catch (error) {
@@ -28,5 +31,9 @@ class AuthRepository {
       print(error);
     }
     return null;
+  }
+
+  void logoutUser() {
+    _firebase.signOut();
   }
 }

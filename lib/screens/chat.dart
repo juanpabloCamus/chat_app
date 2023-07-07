@@ -1,4 +1,6 @@
+import 'package:chat_app/bloc/auth_bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -10,10 +12,28 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
+  void _onLogout() {
+    context.read<AuthBloc>().add(AuthLogoutEvent());
+  }
+
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Text('Chat Screen'),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          'ChatApp',
+        ),
+        actions: <Widget>[
+          IconButton(
+            onPressed: _onLogout,
+            icon: const Icon(Icons.exit_to_app),
+            color: Theme.of(context).colorScheme.primary,
+          ),
+        ],
+      ),
+      body: const Center(
+        child: Text('Chat Screen'),
+      ),
     );
   }
 }
